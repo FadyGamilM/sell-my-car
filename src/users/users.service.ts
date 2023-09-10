@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { InjectRepository } from "@nestjs/typeorm"
 import { Repository } from "typeorm"
@@ -17,12 +17,20 @@ export class UsersService {
 
     // find user by id 
     async FindByID(id: number) {
-        return await this.repo.findOneBy({ id: id })
+        const foundUser = await this.repo.findOneBy({ id: id })
+        if (!foundUser) {
+            throw new NotFoundException('user not found')
+        }
+        return foundUser
     }
 
     // find user by email 
     async FindByEmail(email: string) {
-        return await this.repo.findOneBy({ email: email })
+        const foundUser = await this.repo.findOneBy({ email: email })
+        if (!foundUser) {
+            throw new NotFoundException('user not found')
+        }
+        return foundUser
     }
 
     // update user 
@@ -30,7 +38,7 @@ export class UsersService {
         // so we need to apply hooks to know which i
         const userToUpdate = await this.FindByID(id)
         if (!userToUpdate) {
-            throw new Error('user not found')
+            throw new NotFoundException('user not found')
         }
         // update the props of this user by copying the props of userToUpdate instance first and then override via the properties that are present in the args instance
         const updatedUser = { ...userToUpdate, ...args }
