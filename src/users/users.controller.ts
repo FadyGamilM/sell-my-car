@@ -18,8 +18,12 @@ export class UsersController {
 
     @Post("/signup")
     Signup(@Body() req: CreateUserDto) {
-        log("calling the signup handler")
         return this.authService.Signup(req.email, req.password)
+    }
+
+    @Post("/signin") 
+    Signin(@Body() req : CreateUserDto){
+        return this.authService.Signin(req.email, req.password)
     }
 
     @Delete("/:id")

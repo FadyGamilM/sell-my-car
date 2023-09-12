@@ -1,4 +1,4 @@
-import {Injectable} from "@nestjs/common"
+import {Injectable, NotFoundException} from "@nestjs/common"
 import { UsersService } from "./users.service";
 import { randomBytes, scrypt } from "crypto";
 import { User } from "./user.entity";
@@ -46,5 +46,31 @@ export class AuthService {
 
         // 6. 
         return user
+    }
+
+
+    async Signin(email: string, password: string ) {
+        // 1. check if there is an user registered with this email in our system or not
+        const foundUser : User = await this.userService.FindByEmail(email)
+        if (!foundUser) {
+            throw new NotFoundException("user not found")
+        }
+
+        // 2. extract the hashed stored password in our db 
+        const dbHashedPassword : string = foundUser.password
+
+        // 3. split to get the [salt + hashing(passowrd + salt)]
+        const  salt : string = dbHashedPassword.split("*")[0]
+        const HashedPassWithSalt : string = dbHashedPassword.split("*")[1]
+
+        // 4. hash the signin password with the same scrypt method and with the same salt 
+        const signinHashedPassword : string  = ((await hashFunction(password, salt, 32)) as Buffer).toString("hex")
+
+        // 5. compare the signin hashed combination password with the db hashed combination password 
+        if (signinHashedPassword !== HashedPassWithSalt) {
+            throw new BadRequestException("invalid credentials")
+        }
+
+        return foundUser
     }
 }
