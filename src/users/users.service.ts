@@ -19,6 +19,10 @@ export class UsersService {
 
     // find user by id 
     async FindByID(id: number) {
+        // if id is falsy (null, undefined, whatever it is !)
+        if (!id) {
+            throw new NotFoundException("user not found")
+        }
         const foundUser = await this.repo.findOneBy({ id: id })
         if (!foundUser) {
             throw new NotFoundException('user not found')
@@ -36,7 +40,7 @@ export class UsersService {
     }
 
     // find user by email (utilized by auth service and any other service that relies on this method as an internal step in its logic because we don't want to receive an exception, we just want to know if this user exists or not to take actions based on the result)
-    async CheckIfEmailIsRegistered(email : string) : Promise<Boolean> {
+    async CheckIfEmailIsRegistered(email: string): Promise<Boolean> {
         const foundUser = await this.repo.findOneBy({ email: email })
         if (!foundUser) {
             return true
