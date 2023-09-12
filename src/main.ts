@@ -7,6 +7,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe(
       {
+        // to ask nestjs to ignore any other property that not defined in my dto, i will set the whitelist -> true
         whitelist: true
       }
     )
