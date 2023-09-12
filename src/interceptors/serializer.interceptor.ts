@@ -1,10 +1,24 @@
-import {NestInterceptor, ExecutionContext, CallHandler} from "@nestjs/common"
+import {NestInterceptor, ExecutionContext, CallHandler, UseInterceptors} from "@nestjs/common"
 import { log } from "console"
 import {Observable, map } from "rxjs"
 import {plainToClass} from "class-transformer"
 
-export class SerializerInterceptor implements NestInterceptor{
-    constructor(private outputDto : any){}
+// this interface is defined to specify some type-safety over our custom interceptor to recieve any class type but throw compile time error when it receives any non-class type
+// interface ClassType {
+//     new (...args:any[]): {}
+// }
+type ClassType<T> = {
+    new(...args: any[]) : T
+}
+
+
+// this function (decorator) is used to wrap the complexity of interceptors from the controller part
+export function CustomSerialize<T>(outputDto :ClassType<T>) {
+    return UseInterceptors(new SerializerInterceptor(outputDto))
+}
+
+export class SerializerInterceptor<T> implements NestInterceptor{
+    constructor(private outputDto : ClassType<T>){}
 
     intercept(ctx : ExecutionContext, next: CallHandler) : Observable<any>{
         // ==> this part of code is responsible for any code i want to run before the handler (controller) start working
