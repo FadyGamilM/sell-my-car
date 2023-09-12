@@ -1,9 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+const cookieSession = require("cookie-session");
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // use cookie session 
+  app.use(cookieSession({ keys: ["sell-my-fuckin-car"] }))
+
+  // use validation pipe to validate incoming requests
   app.useGlobalPipes(
     new ValidationPipe(
       {
