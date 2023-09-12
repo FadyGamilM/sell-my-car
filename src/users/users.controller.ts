@@ -5,15 +5,21 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import {SerializerInterceptor} from "../interceptors/serializer.interceptor"
 import {GetUserDto} from "./dtos/get-user.dto"
 import { CustomSerialize } from '../interceptors/serializer.interceptor';
+import { AuthService } from './auth.service';
+import { log } from 'console';
 
 @Controller('users')
 export class UsersController {
 
-    constructor(private userService: UsersService) { }
+    constructor(
+        private userService: UsersService,
+        private authService : AuthService,
+        ) { }
 
     @Post("/signup")
     Signup(@Body() req: CreateUserDto) {
-        return this.userService.Create(req.email, req.password)
+        log("calling the signup handler")
+        return this.authService.Signup(req.email, req.password)
     }
 
     @Delete("/:id")

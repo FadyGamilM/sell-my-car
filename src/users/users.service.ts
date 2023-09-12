@@ -3,6 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from "@nestjs/typeorm"
 import { Repository } from "typeorm"
 import { User } from './user.entity';
+import { log } from 'console';
 @Injectable()
 export class UsersService {
     constructor(
@@ -12,6 +13,7 @@ export class UsersService {
     // method to create and persist an User
     async Create(email: string, password: string) {
         const createdUser: User = this.repo.create({ email, password })
+        log("calling the create user service with email => ", email)
         return await this.repo.save(createdUser)
     }
 
@@ -24,13 +26,22 @@ export class UsersService {
         return foundUser
     }
 
-    // find user by email 
+    // find user by email (utilized by the user service when the only purpose of the requet is to check if there is an user with this email because it returns an exception if this user is not here)
     async FindByEmail(email: string) {
         const foundUser = await this.repo.findOneBy({ email: email })
         if (!foundUser) {
             throw new NotFoundException('user not found')
         }
         return foundUser
+    }
+
+    // find user by email (utilized by auth service and any other service that relies on this method as an internal step in its logic because we don't want to receive an exception, we just want to know if this user exists or not to take actions based on the result)
+    async CheckIfEmailIsRegistered(email : string) : Promise<Boolean> {
+        const foundUser = await this.repo.findOneBy({ email: email })
+        if (!foundUser) {
+            return true
+        }
+        return false
     }
 
     // update user 
